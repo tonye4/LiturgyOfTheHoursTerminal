@@ -6,11 +6,22 @@ import (
 	"github.com/gocolly/colly"
 )
 
+type Reading struct {
+	Date  string
+	Title string
+	Body  string
+	URL   string
+}
+
 // c = new collector object. Manages network communicaiton and responsible for handling golang callbacks.
 func main() {
 	c := colly.NewCollector(
 		colly.AllowedDomains("divineoffice.org"),
 	)
+
+	//readings := make([]Reading, 0, 10)
+
+	cc := c.Clone()
 	//var prayerItems []string
 
 	// Get to print out links of all .prayers-grid-items
@@ -44,7 +55,17 @@ func main() {
 		link := e.Attr("href")
 		fmt.Println("found link: ", link)
 
+		cc.Visit(link)
 		// find pattern for visiting and further scraping links.
+	})
+
+	cc.OnHTML(".entry", func(e *colly.HTMLElement) {
+		fmt.Println("I'm in dat")
+
+		fart := e.DOM.Find(".entry > h2").Text()
+
+		fmt.Println(fart)
+		// print out child elements.
 	})
 
 	/* 	c.OnHTML("a[href*=ord-]", func(e *colly.HTMLElement) {
@@ -68,6 +89,10 @@ func main() {
 	}) */
 
 	c.OnRequest(func(r *colly.Request) {
+		fmt.Println("Visiting", r.URL)
+	})
+
+	cc.OnRequest(func(r *colly.Request) {
 		fmt.Println("Visiting", r.URL)
 	})
 
