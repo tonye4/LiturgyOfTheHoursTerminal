@@ -3,13 +3,14 @@ package main
 import (
 	"fmt"
 	//"strings"
+
 	"github.com/gocolly/colly"
 )
 
 type Reading struct {
 	Date  string
 	Title string
-	Body  string
+	Body  []string // consider making it a slice of paragraphs.
 	URL   string
 }
 
@@ -64,10 +65,26 @@ func main() {
 		date := e.DOM.Find(".entry > p:nth-of-type(1)").Text()
 		title := e.DOM.Find(".entry > h2").Text() // we can use goQuery to actually get stuff wow very nice.
 		// the body should be one big appended string -> need to account for the fact that the # of p's per page can vary!
-		body := e.DOM.Find(".entry > p:nth-child(n+2)").Text()
+
+		// TODO: unformatted + kinda fug. Add some line breaks.
+
+		body := e.DOM.Find(".entry > p:nth-child(n+2)").Text() // This isn't ideal bcos we now don't have a seperation of paragraphs for prettier formatting.
+
+		// placeholder variable until I set up the actual object!
+
+		/* 		pNodes := e.DOM.Find(".entry >p:nth-of-type(n+2)")
+		   		for i, v := range pNodes.Nodes {
+		   			pNodes.Text()
+		   		} */
+
+		// this is the genral idea, but it's prolly not how to go about making a slice of paragraphs.
+		/* 		e.DOM.Find(".entry").Each(func(row int, s *goquery.Selection) {
+			paragraphs = append(paragraphs, s.Find("p").Text()) // hopefully dat works lol
+		}) */
 
 		fmt.Println(date)
 		fmt.Println(title)
+
 		fmt.Println(body)
 		// print out child elements.
 	})
