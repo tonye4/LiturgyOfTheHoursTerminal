@@ -60,11 +60,15 @@ func main() {
 	})
 
 	cc.OnHTML(".entry", func(e *colly.HTMLElement) {
-		fmt.Println("I'm in dat")
+		// make look nicer after a lickle bit!
+		date := e.DOM.Find(".entry > p:nth-of-type(1)").Text()
+		title := e.DOM.Find(".entry > h2").Text() // we can use goQuery to actually get stuff wow very nice.
+		// the body should be one big appended string -> need to account for the fact that the # of p's per page can vary!
+		body := e.DOM.Find(".entry > p:nth-child(n+2)").Text()
 
-		fart := e.DOM.Find(".entry > h2").Text()
-
-		fmt.Println(fart)
+		fmt.Println(date)
+		fmt.Println(title)
+		fmt.Println(body)
 		// print out child elements.
 	})
 
