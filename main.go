@@ -23,20 +23,18 @@ func TextL(s *goquery.Selection) string {
 
 	var f func(*html.Node)
 	f = func(n *html.Node) {
-		fmt.Println(n.Data)
 		// n.Data prints out what the actual element is depending on what kind of Node it is. For element nodes -> possibilities are: p, span and br.
-		// if we run into p it's children nodes will always either be a string of text of type TextNode or <span> or <br> of type ElementNode.
+		// if next sibling of a text block is a <br> , "-" or "ant" don't append a new line.
+		var noNl string
 
-		/* 	if n.Data == "p" {
-			fmt.Println(n.Data)
-			if n.FirstChild.Data == "span" {
-				fmt.Println("Hi i'm a span")
-			} else {
-				n.ChildNodes()
-			}
-		} */
-		if n.Type == html.TextNode {
+		if n.NextSibling != nil {
+			noNl = n.NextSibling.Data
+		}
+
+		if n.Type == html.TextNode && noNl != "br" {
 			builder.WriteString(n.Data + "\n")
+		} else if n.Type == html.TextNode {
+			builder.WriteString(n.Data)
 		}
 		if n.FirstChild != nil {
 			for c := n.FirstChild; c != nil; c = c.NextSibling {
@@ -90,14 +88,10 @@ func main() {
 	cc.OnHTML(".entry", func(e *colly.HTMLElement) {
 
 		// selection object contains a slice of Node objects.
-		date := e.DOM.Find(".entry > p:nth-of-type(1)").Text()
+		/* 		date := e.DOM.Find(".entry > p:nth-of-type(1)").Text() */
 		title := e.DOM.Find(".entry > h2").Text() // we can use goQuery to actually get stuff wow very nice.
 
-		// the body should be one big appended string -> need to account for the fact that the # of p's per page can vary!
-
-		// TODO: unformatted + kinda fug. Add some line breaks.
-
-		selectionObj := e.DOM.Find(".entry > p:nth-child(n+2)") // This isn't ideal bcos we now don't have a seperation of paragraphs for prettier formatting.
+		selectionObj := e.DOM.Find(".entry > p") // This isn't ideal bcos we now don't have a seperation of paragraphs for prettier formatting.
 		body := TextL(selectionObj)
 
 		// placeholder variable until I set up the actual object!
@@ -116,7 +110,7 @@ func main() {
 			paragraphs = append(paragraphs, s.Find("p").Text()) // hopefully dat works lol
 		}) */
 
-		fmt.Println(date)
+		//fmt.Println(date)
 		fmt.Println(title)
 
 		fmt.Println(body)
