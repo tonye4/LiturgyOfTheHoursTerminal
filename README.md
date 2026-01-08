@@ -1,3 +1,4 @@
 # Progress
 - (jan 2 2025) Currently still trying to figure out how dis scraper works lol will be back 
 - (jan 3 2025) Current concern is how I'd format the entry texts. The pure html is placed inside an entry struct and is just one phat string, trying to figure out how I can add line breaks or something like that to format it idk..
+- (Jan 7 2025) Another factor that wasn't considered was that certain links such as 'about' were not always guaranteed to be present every day. Example Jan 6-8 Tuesday-Thursday after Epiphany there's no about section to scrape. I'm now thinking about ways in which I can format the big blob of text. One current observation is that when <br> are found, the newline is preserved, however the same isn't true for <p> and <span>.
