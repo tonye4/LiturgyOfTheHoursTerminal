@@ -119,7 +119,6 @@ func main() {
 		fmt.Println("found link: ", link)
 
 		cc.Visit(link)
-
 	})
 
 	// On each new <p> and <span> append a \n so that when it's all appended by .Text() it prints out in it's intended formatting.
