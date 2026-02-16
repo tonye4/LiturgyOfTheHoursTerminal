@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/gocolly/colly"
 	"golang.org/x/net/html"
@@ -20,6 +21,31 @@ type ApiResponse map[string]struct {
 
 // Function that uses /net/html package to recurse through the html string and build to a new string
 // only the values that are text contents and not of type element, giving us pure pre-formatted text.
+
+// date format -> [yearmonthday]
+// TODO: Use string builder to spit out URL.
+// TODO: Get current day and day in 7 days.
+// API Query -> "https://divineoffice.org/wp-json/do/v1/prayers/?date_start=[yearmonthday]&date_end=[yearmonthday]"
+func getURL() string {
+	var b strings.Builder
+
+	// Current day and day seven days from now.
+	currentDate := time.Now().Format(time.DateOnly)
+	futureDate := time.Now().AddDate(0, 0, 7).Format(time.DateOnly)
+
+	currentDateFormatted := strings.ReplaceAll(currentDate, "-", "")
+	futureDateFormatted := strings.ReplaceAll(futureDate, "-", "")
+
+	b.WriteString("https://divineoffice.org/wp-json/do/v1/prayers/?date_start=")
+	b.WriteString(currentDateFormatted)
+	b.WriteString("&date_end=")
+	b.WriteString(futureDateFormatted)
+
+	url := b.String()
+
+	return url
+}
+
 func formatString(str string) string {
 	// Can just use net/html
 	doc, err := html.Parse(strings.NewReader(str))
@@ -43,6 +69,8 @@ func formatString(str string) string {
 }
 
 func main() {
+
+	url := getURL()
 
 	c := colly.NewCollector(
 		colly.AllowedDomains("divineoffice.org"),
@@ -68,7 +96,8 @@ func main() {
 		}
 
 		for date, day := range apiResp {
-			fmt.Print(date)
+			fmt.Println(date)
+			fmt.Println(day)
 			for _, p := range day.Prayers {
 				p.PostContent = formatString(p.PostContent)
 				fmt.Printf("title: %s, content: %s\n", p.PostTitle, p.PostContent)
@@ -77,8 +106,8 @@ func main() {
 	})
 
 	// Visit the API endpoint directly
-	c.Visit("https://divineoffice.org/wp-json/do/v1/prayers/?date_start=20260129")
-
+	c.Visit(url)
+	fmt.Println("this is the url: ", url)
 	// TODO: Get current date each run of the script and format it in a similar way.
 	// the api query is dynamic in that it changes each day, so need it to be updated.
 
