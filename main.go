@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -31,7 +32,7 @@ func getURL() string {
 
 	// Current day and day seven days from now.
 	currentDate := time.Now().Format(time.DateOnly)
-	futureDate := time.Now().AddDate(0, 0, 7).Format(time.DateOnly)
+	futureDate := time.Now().AddDate(0, 0, 5).Format(time.DateOnly)
 
 	currentDateFormatted := strings.ReplaceAll(currentDate, "-", "")
 	futureDateFormatted := strings.ReplaceAll(futureDate, "-", "")
@@ -68,6 +69,32 @@ func formatString(str string) string {
 	return b.String()
 }
 
+func cachePrayers(prayers ApiResponse) {
+	// Marshal map into JSON object
+	jsonedPrayers, err1 := json.MarshalIndent(prayers, "", "\t")
+
+	if err1 != nil {
+		panic(err1)
+	}
+
+	//fmt.Println(string(jsonedPrayers))
+	// Write object into file
+	file, err2 := os.Create("cached_prayers.json")
+
+	if err2 != nil {
+		panic(err2)
+	}
+
+	_, err3 := file.WriteAt(jsonedPrayers, 0)
+
+	if err3 != nil {
+		panic(err3)
+	}
+
+	fmt.Println("Succesfuly wrote to file: cached_prayers.json")
+	// return int representing success or fail.
+}
+
 func main() {
 
 	url := getURL()
@@ -84,10 +111,8 @@ func main() {
 	})
 
 	c.OnResponse(func(r *colly.Response) {
+		// do I nedd to run make to give the map some memory?
 		var apiResp ApiResponse
-
-		fmt.Println("RAW RESPONSE:")
-		fmt.Println(string(r.Body))
 
 		err := json.Unmarshal(r.Body, &apiResp)
 		if err != nil {
@@ -95,19 +120,20 @@ func main() {
 			return
 		}
 
-		for date, day := range apiResp {
+		cachePrayers(apiResp)
+
+		/* 		for date, day := range apiResp {
 			fmt.Println(date)
-			fmt.Println(day)
+			//fmt.Println(day)
 			for _, p := range day.Prayers {
 				p.PostContent = formatString(p.PostContent)
 				fmt.Printf("title: %s, content: %s\n", p.PostTitle, p.PostContent)
 			}
-		}
+		} */
 	})
 
 	// Visit the API endpoint directly
 	c.Visit(url)
-	fmt.Println("this is the url: ", url)
 	// TODO: Get current date each run of the script and format it in a similar way.
 	// the api query is dynamic in that it changes each day, so need it to be updated.
 
