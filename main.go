@@ -12,7 +12,20 @@ import (
 	"golang.org/x/net/html"
 )
 
-// TODO:
+/*
+TODO: Change the name of this file to getPrayers.
+The actual main file is going to be the TUI frontend and it's going to be
+using the backend ie prompting caching through a function call.
+We can get our frontend to check during initialization if more prayers are
+required ie, the last cached day was passed or there are no cached prayers
+in general, which would call these various functions.
+
+Before we link these together ie make this file a library of prayer functions
+I want to use the .json file seperately and just run the TUI to
+see how it works and how it's gonna look and then we can connect them together.
+
+TUI is going to be Charm Bracelet and Lip Gloss (for styles).
+*/
 type ApiResponse map[string]struct {
 	Prayers []struct {
 		PostTitle   string `json:"post_title"`
@@ -79,7 +92,11 @@ func cachePrayers(prayers ApiResponse) {
 
 	//fmt.Println(string(jsonedPrayers))
 	// Write object into file
+	// Create second file that holds data
 	file, err2 := os.Create("cached_prayers.json")
+
+	// logic to create a cache_history file.
+	// check if file exists.
 
 	if err2 != nil {
 		panic(err2)
@@ -96,6 +113,8 @@ func cachePrayers(prayers ApiResponse) {
 }
 
 func main() {
+	// Before caling endpoint, check if cached_prayers.json exists
+	// and also check if it's last day (last 2 digits of the string)
 
 	url := getURL()
 
