@@ -9,7 +9,9 @@ if required.
 */
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -23,7 +25,14 @@ type model struct {
 	selected map[int]struct{} // which to-do items are selected
 }
 
-func getday() string {
+type prayerJson map[string]struct {
+	Prayers []struct { // slice of structs because any date could have x amt of prayers with the same construct: PostTitle and PostContent.
+		PostTitle   string `json:"post_title"`
+		PostContent string `json:"post_content"`
+	} `json:"prayers"`
+}
+
+func getDay() string {
 	currentDate := time.Now().Format(time.DateOnly)
 	currentDateFormatted := strings.ReplaceAll(currentDate, "-", "")
 
@@ -31,9 +40,44 @@ func getday() string {
 }
 
 func initialModel() model {
+	todayDate := getDay()
+
+	fileBytes, err1 := os.ReadFile("cached_prayers.json")
+	if err1 != nil {
+		log.Fatal(err1)
+	}
+
+	var prayers prayerJson
+
+	err2 := json.Unmarshal(fileBytes, &prayers)
+	if err2 != nil {
+		log.Fatal(err2)
+	}
+
+	//fmt.Println(prayers[todayDate].Prayers[0].PostTitle)
+
+	//
+	// Clean up the code after you get it working, don't want pretty code right
+	// now just want something that works.
+	// Note: The slice needs to be dynamic.
+	//
+
+	var numNames []string
+	numNames = make([]string, 10) // make dynamic.
+	number := 0
+
+	for number < len(prayers[todayDate].Prayers) {
+		//fmt.Println(prayers[todayDate].Prayers[number].PostTitle)
+		numNames[number] = prayers[todayDate].Prayers[number].PostTitle
+		fmt.Println(numNames[number])
+
+		number++
+	}
+
 	return model{
 		// This is a slice, try making a map and unpack the title of the prayers into there.
-		choices: []string{"Buy carrots", "Buy celery", "Buy kohlrabi"},
+		choices: numNames[:8],
+		//choices: prayers[todayDate].Prayers,
 
 		// A map which indicates which choices are selected. We're using
 		// the  map like a mathematical set. The keys refer to the indexes
@@ -75,12 +119,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// The "enter" key and the space bar toggle the selected state
 		// for the item that the cursor is pointing at.
-		case "enter", "space":
+		/* 		case "enter", "space":
 			_, ok := m.selected[m.cursor]
 			if ok {
 				delete(m.selected, m.cursor)
 			} else {
 				m.selected[m.cursor] = struct{}{}
+			}
+		} */
+		case "enter", "space":
+			_, ok := m.selected[m.cursor]
+			if ok {
+				// what does struct{}{} do?
+				delete(m.selected, m.cursor)
 			}
 		}
 	}
@@ -92,6 +143,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() tea.View {
 	// The header
+	// This can be our variable we change in order to print out the actual prayers.
 	s := "What should we buy at the market?\n\n"
 
 	// Iterate over our choices
