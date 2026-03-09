@@ -19,13 +19,12 @@ import (
 	tea "charm.land/bubbletea/v2"
 )
 
-type model struct {
-	choices  []string         // items on the to-do list
-	cursor   int              // which to-do list item our cursor is pointing at
-	selected map[int]struct{} // which to-do items are selected
+type modelz struct {
+	choices []string // items on the to-do list
+	cursor  int      // which to-do list item our cursor is pointing at selected map[int]struct{} // which to-do items are selected }
 }
 
-type prayerJson map[string]struct {
+type prayerJsonz map[string]struct {
 	Prayers []struct { // slice of structs because any date could have x amt of prayers with the same construct: PostTitle and PostContent.
 		PostTitle   string `json:"post_title"`
 		PostContent string `json:"post_content"`
@@ -39,7 +38,7 @@ func getDay() string {
 	return currentDateFormatted
 }
 
-var prayers prayerJson // should we init this in the model?
+var prayerss prayerJson // should we init this in the model?
 var todayDate = getDay()
 
 func initialModel() model {
@@ -90,12 +89,12 @@ func initialModel() model {
 }
 
 // Init I/O will be reading our .JSON file.
-func (m model) Init() tea.Cmd {
+func (m model) Initz() tea.Cmd {
 	// Just return `nil`, which means "no I/O Sright now, please."
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Updatez(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 
 	// Is it a key press?
@@ -137,7 +136,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) View() tea.View {
+func (m model) Viewz() tea.View {
 	// The header
 	// This can be our variable we change in order to print out the actual prayers.
 
@@ -174,7 +173,7 @@ func (m model) View() tea.View {
 	return tea.NewView(s)
 }
 
-func main() {
+func main2() {
 	p := tea.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)

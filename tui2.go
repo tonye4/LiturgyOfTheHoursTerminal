@@ -70,7 +70,65 @@ func main() {
 }
 
 func (m model) Init() tea.Cmd {
-	return loadJson()
+	return loadJson(today())
+}
+
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+
+	case prayerMsg:
+		m.selectedDay = msg.day
+		m.prayerNames = msg.prayerNames
+		m.prayerList = msg.prayerList
+
+		return m, nil
+
+	case tea.KeyPressMsg:
+		switch msg.String() {
+
+		case "ctrl+c", "q":
+			return m, tea.Quit
+
+		case "up", "k":
+			if m.cursor > 0 {
+				m.cursor--
+			}
+
+		case "down", "j":
+			if m.cursor < len(m.prayerNames)-1 {
+				m.cursor++
+			}
+
+		case "enter", "space":
+			choice := m.prayerNames[m.cursor]
+			m.loadedPrayer = m.prayerList[choice]
+
+			return m, nil
+
+		// want to be able to back out of a prayer.
+		case "backspace":
+			if m.loadedPrayer != "" {
+				m.loadedPrayer = ""
+			}
+
+			return m, nil
+		}
+
+	}
+
+	// do we need to return any cmds here?
+	return m, nil
+}
+
+func (m model) View() tea.View {
+	// header
+	var s string
+
+	if m.loadedPrayer == "" {
+
+	}
+
+	return tea.NewView(s)
 }
 
 //
