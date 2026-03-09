@@ -70,7 +70,8 @@ func main() {
 }
 
 func (m model) Init() tea.Cmd {
-	return loadJson(today())
+	currentDate := "20260309" // should use today()
+	return loadJson(currentDate)
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -121,12 +122,41 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() tea.View {
-	// header
 	var s string
 
 	if m.loadedPrayer == "" {
+		// header
+		s = "Select Prayer\n\n"
 
+		for i := 0; i < len(m.prayerNames); i++ {
+
+			choice := m.prayerNames[i]
+
+			cursor := " "
+			if m.cursor == i {
+				cursor = ">"
+			}
+
+			s += fmt.Sprintf("%s %s\n", cursor, choice)
+		}
+
+		/* 		for i, choice := range m.prayerNames {
+
+			cursor := " "
+			if m.cursor == i {
+				cursor = ">"
+			}
+
+			s += fmt.Sprintf("%s %s\n", cursor, choice)
+		} */
+
+	} else {
+		s = m.loadedPrayer
+
+		s += "\nPress backspace to go back to menu.\n"
 	}
+
+	s += "\nPress q to quit.\n"
 
 	return tea.NewView(s)
 }
@@ -154,14 +184,18 @@ func loadJson(date string) tea.Cmd {
 			isCached = true
 		}
 
-		var prayerTitles []string
-		prayerTitles = make([]string, 6, 12)
+		//var prayerTitles []string
+		prayerTitles := make([]string, 6, 12)
+		var prayerTitle string
+
 		prayerList := make(map[string]string)
 
 		// The loop populates... (finish documenting later)
 		for i := 0; i < len(prayers[date].Prayers); i++ {
-			prayerTitles[i] = prayers[date].Prayers[i].PostTitle
-			prayerList[prayerTitles[i]] = prayers[date].Prayers[i].PostContent
+			prayerTitle = prayers[date].Prayers[i].PostTitle
+
+			prayerTitles = append(prayerTitles, prayerTitle) // keep an eye on this for unexpected behaviour.
+			prayerList[prayerTitle] = prayers[date].Prayers[i].PostContent
 		}
 
 		return prayerMsg{
