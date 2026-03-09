@@ -39,15 +39,18 @@ func getDay() string {
 	return currentDateFormatted
 }
 
+var prayers prayerJson // should we init this in the model?
+var todayDate = getDay()
+
 func initialModel() model {
-	todayDate := getDay()
+	//todayDate := getDay()
 
 	fileBytes, err1 := os.ReadFile("cached_prayers.json")
 	if err1 != nil {
 		log.Fatal(err1)
 	}
 
-	var prayers prayerJson
+	//var prayers prayerJson // make it a global var.
 
 	err2 := json.Unmarshal(fileBytes, &prayers)
 	if err2 != nil {
@@ -62,21 +65,21 @@ func initialModel() model {
 	// Note: The slice needs to be dynamic.
 	//
 
-	var numNames []string
-	numNames = make([]string, 10) // make dynamic.
+	var prayerTitles []string
+	prayerTitles = make([]string, 10) // make dynamic.
 	number := 0
 
 	for number < len(prayers[todayDate].Prayers) {
 		//fmt.Println(prayers[todayDate].Prayers[number].PostTitle)
-		numNames[number] = prayers[todayDate].Prayers[number].PostTitle
-		fmt.Println(numNames[number])
+		prayerTitles[number] = prayers[todayDate].Prayers[number].PostTitle
+		//fmt.Println(prayerTitles[number])
 
 		number++
 	}
 
 	return model{
 		// This is a slice, try making a map and unpack the title of the prayers into there.
-		choices: numNames[:8],
+		choices: prayerTitles[:8],
 		//choices: prayers[todayDate].Prayers,
 
 		// A map which indicates which choices are selected. We're using
@@ -88,7 +91,7 @@ func initialModel() model {
 
 // Init I/O will be reading our .JSON file.
 func (m model) Init() tea.Cmd {
-	// Just return `nil`, which means "no I/O right now, please."
+	// Just return `nil`, which means "no I/O Sright now, please."
 	return nil
 }
 
@@ -117,21 +120,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.cursor++
 			}
 
-		// The "enter" key and the space bar toggle the selected state
-		// for the item that the cursor is pointing at.
-		/* 		case "enter", "space":
-			_, ok := m.selected[m.cursor]
-			if ok {
-				delete(m.selected, m.cursor)
-			} else {
-				m.selected[m.cursor] = struct{}{}
-			}
-		} */
+			// The "enter" key and the space bar toggle the selected state
+			// for the item that the cursor is pointing at.
 		case "enter", "space":
 			_, ok := m.selected[m.cursor]
 			if ok {
-				// what does struct{}{} do?
-				delete(m.selected, m.cursor)
+				delete(m.selected, m.cursor) // we'll keep this for now
+			} else {
+				m.selected[m.cursor] = struct{}{} // pretty much denotes that the selected choice has been selected.
 			}
 		}
 	}
@@ -144,7 +140,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() tea.View {
 	// The header
 	// This can be our variable we change in order to print out the actual prayers.
-	s := "What should we buy at the market?\n\n"
+
+	//
+	// 's' should be updated to reflect the prayer that was selected.
+	//
+
+	s := "Select Prayer\n\n"
 
 	// Iterate over our choices
 	for i, choice := range m.choices {
@@ -156,13 +157,14 @@ func (m model) View() tea.View {
 		}
 
 		// Is this choice selected?
-		checked := " " // not selected
+		//checked := " " // not selected
+		// does the m.selected index EXIST! (refer to update ie was it initialized with an empty struct or not nil sturct{}{})
 		if _, ok := m.selected[i]; ok {
-			checked = "x" // selected!
+			s = prayers[todayDate].Prayers[0].PostContent
 		}
 
 		// Render the row
-		s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
+		s += fmt.Sprintf("%s %s\n", cursor, choice)
 	}
 
 	// The footer
