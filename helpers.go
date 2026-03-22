@@ -12,3 +12,6 @@ func today() string {
 
 	return currentDateFormatted
 }
+
+// create helper for viewing specific days in the prayer cache.
+// Make it indented.
