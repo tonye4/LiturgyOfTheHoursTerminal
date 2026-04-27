@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -12,9 +13,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-// TODO: Change up the naming convention of main.go and the packages.
 /*
-TODO: Change the name of this file to getPrayers.
 The actual main file is going to be the TUI frontend and it's going to be
 using the backend ie prompting caching through a function call.
 We can get our frontend to check during initialization if more prayers are
@@ -34,12 +33,7 @@ type ApiResponse map[string]struct {
 	} `json:"prayers"`
 }
 
-// Function that uses /net/html package to recurse through the html string and build to a new string
-// only the values that are text contents and not of type element, giving us pure pre-formatted text.
-
 // date format -> [yearmonthday]
-// TODO: Use string builder to spit out URL.
-// TODO: Get current day and day in 7 days.
 // API Query -> "https://divineoffice.org/wp-json/do/v1/prayers/?date_start=[yearmonthday]&date_end=[yearmonthday]"
 func getURL() string {
 	var b strings.Builder
@@ -61,7 +55,9 @@ func getURL() string {
 	return url
 }
 
-func formatString(str string) string {
+// Function that uses /net/html package to recurse through the html string and build to a new string
+// only the values that are text contents and not of type element, giving us pure pre-formatted text.
+func FormatString(str string) string {
 	// Can just use net/html
 	doc, err := html.Parse(strings.NewReader(str))
 	if err != nil {
@@ -72,7 +68,12 @@ func formatString(str string) string {
 	var f func(*html.Node)
 	f = func(n *html.Node) {
 		if n.Type == html.TextNode {
-			b.WriteString(n.Data)
+			// Manually adding line breaks after punctuation to 'wrap'
+			// the long blocks of text that fall offscreen.
+			r := regexp.MustCompile(`[,.;:]`)
+			// $0 is just the placeholder for the replacement regex string
+			foldedString := r.ReplaceAllString(n.Data, "$0\n")
+			b.WriteString(foldedString)
 		}
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
 			f(c)
