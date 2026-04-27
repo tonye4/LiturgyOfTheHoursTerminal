@@ -1,4 +1,4 @@
-package main
+package prayers
 
 import (
 	"encoding/json"
@@ -141,20 +141,10 @@ func GetPrayers() {
 		}
 
 		cachePrayers(apiResp)
-
-		/* 		for date, day := range apiResp {
-			fmt.Println(date)
-			//fmt.Println(day)
-			for _, p := range day.Prayers {
-				p.PostContent = formatString(p.PostContent)
-				fmt.Printf("title: %s, content: %s\n", p.PostTitle, p.PostContent)
-			}
-		} */
 	})
 
 	// Visit the API endpoint directly
 	c.Visit(url)
-	// TODO: Get current date each run of the script and format it in a similar way.
 	// the api query is dynamic in that it changes each day, so need it to be updated.
 
 	// Can implement caching, each week sunday, data is pulled into a .json file and then is just used accordingly to each day.
