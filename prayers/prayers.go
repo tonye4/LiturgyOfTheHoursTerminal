@@ -61,7 +61,7 @@ func getURL() string {
 	return url
 }
 
-func formatString(str string) string {
+func FormatString(str string) string {
 	// Can just use net/html
 	doc, err := html.Parse(strings.NewReader(str))
 	if err != nil {

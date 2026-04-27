@@ -131,7 +131,6 @@ func loadPrayersCmd() tea.Cmd {
 
 func (m model) Init() tea.Cmd {
 	// TODO: Get the program to have a loading page if the getting prayers takes a while.
-	prayers.GetPrayers() // this shouldn't run every time. If today doesn't match up then we should call this.
 	return loadPrayersCmd()
 }
 
@@ -145,6 +144,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 
+	// After the prayer loaded msg returns we set the returned values to our model struct fields for rendering.
 	case prayerLoadedMsg:
 		m.prayerNames = msg.names
 		m.prayerList = msg.prayerList
@@ -179,6 +179,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.cursor < len(m.prayerNames)-1 {
 					m.cursor++
 				}
+			// When the user presses enter, we set the specific prayer
+			// within the viewport.
 			case "enter", " ":
 				if len(m.prayerNames) == 0 {
 					break
@@ -224,6 +226,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 // ─── View ────────────────────────────────────────────────────────────────────
 
 func (m model) View() tea.View {
+	// where all the actual rendering happens
 	var v tea.View
 	v.AltScreen = true
 	v.MouseMode = tea.MouseModeCellMotion
@@ -268,6 +271,7 @@ func (m model) renderMenu() string {
 			}
 		}
 
+		// Rendering our cursor position.
 		for i, name := range m.prayerNames {
 			var item string
 			if m.cursor == i {
