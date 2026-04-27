@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -56,7 +57,6 @@ func getURL() string {
 
 // Function that uses /net/html package to recurse through the html string and build to a new string
 // only the values that are text contents and not of type element, giving us pure pre-formatted text.
-// TODO: add line folding on punctuation.
 func FormatString(str string) string {
 	// Can just use net/html
 	doc, err := html.Parse(strings.NewReader(str))
@@ -68,7 +68,12 @@ func FormatString(str string) string {
 	var f func(*html.Node)
 	f = func(n *html.Node) {
 		if n.Type == html.TextNode {
-			b.WriteString(n.Data)
+			// Manually adding line breaks after punctuation to 'wrap'
+			// the long blocks of text that fall offscreen.
+			r := regexp.MustCompile(`[,.;:]`)
+			// $0 is just the placeholder for the replacement regex string
+			foldedString := r.ReplaceAllString(n.Data, "$0\n")
+			b.WriteString(foldedString)
 		}
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
 			f(c)
