@@ -1,4 +1,4 @@
-module scripts/divineOffice
+module github.com/tonye4/LiturgyOfTheHoursTerminal
 
 go 1.25.5
 
