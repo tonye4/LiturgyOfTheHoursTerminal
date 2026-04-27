@@ -13,8 +13,6 @@ import (
 	"github.com/tonye4/LiturgyOfTheHoursTerminal/prayers"
 )
 
-// TODO: add line folding. Entire paragraphs go off screen if there's no html element seperating each line.
-
 // ─── View states ─────────────────────────────────────────────────────────────
 
 type viewState int

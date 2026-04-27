@@ -7,3 +7,5 @@
 - [ ] Add command entry point to run the source
 - [ ] Document inline 
 - [ ] Not all prayers start from 0% within the paginator. Fix this bug.
+- [ ] On keywords such as PSALMODY, Ribbon placement...highlight red and center align
+- [ ] Center align viewport
