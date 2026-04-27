@@ -10,6 +10,7 @@ import (
 	"charm.land/bubbles/v2/viewport"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	"github.com/tonye4/LiturgyOfTheHoursTerminal/prayers"
 )
 
 // TODO: add line folding. Entire paragraphs go off screen if there's no html element seperating each line.
@@ -92,38 +93,34 @@ type errMsg struct{ err error }
 
 func loadPrayersCmd() tea.Cmd {
 	return func() tea.Msg {
+		// Read in and unmarshall our cached_prayers.json into the prayerList map.
+		// It should be populated but if it's not we need to fetch more prayers.
 		fileBytes, err := os.ReadFile("cached_prayers.json")
 		if err != nil {
 			return errMsg{fmt.Errorf("could not read cached_prayers.json: %w", err)}
 		}
 
-		var prayers ApiResponse
-		if err := json.Unmarshal(fileBytes, &prayers); err != nil {
+		var prayersList prayers.ApiResponse
+		if err := json.Unmarshal(fileBytes, &prayersList); err != nil {
 			return errMsg{fmt.Errorf("could not parse prayers JSON: %w", err)}
 		}
 
-		date := today()
-		day, ok := prayers[date]
+		// Check if our list of prayers contains our date.
+		// If our today date doesn't exist, we scrape
+		// for more prayers for today and future dates.
+		// TODO: Create a test for this bit of logic.
+		date := Today()
+		day, ok := prayersList[date]
 		if !ok {
-			// fall back to the most recent cached date
-			latest := ""
-			for k := range prayers {
-				if k > latest {
-					latest = k
-				}
-			}
-			if latest == "" {
-				return errMsg{fmt.Errorf("no prayers found in cache")}
-			}
-			date = latest
-			day = prayers[date]
+			prayers.GetPrayers()
+			day = prayersList[date]
 		}
 
 		var names []string
 		list := make(map[string]string)
 		for _, p := range day.Prayers {
 			names = append(names, p.PostTitle)
-			list[p.PostTitle] = formatString(p.PostContent)
+			list[p.PostTitle] = prayers.FormatString(p.PostContent)
 		}
 
 		return prayerLoadedMsg{names, list, date}
@@ -134,7 +131,7 @@ func loadPrayersCmd() tea.Cmd {
 
 func (m model) Init() tea.Cmd {
 	// TODO: Get the program to have a loading page if the getting prayers takes a while.
-	GetPrayers()
+	prayers.GetPrayers() // this shouldn't run every time. If today doesn't match up then we should call this.
 	return loadPrayersCmd()
 }
 

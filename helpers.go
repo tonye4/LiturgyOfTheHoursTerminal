@@ -6,7 +6,7 @@ import (
 )
 
 // Date format within the JSON file: 20260206
-func today() string {
+func Today() string {
 	currentDate := time.Now().Format(time.DateOnly)
 	currentDateFormatted := strings.ReplaceAll(currentDate, "-", "")
 
