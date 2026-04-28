@@ -220,7 +220,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				// Wrapping our content with a width before setting allows for
 				// sensible line breaks in long blocks of text.
 				wrappedContent := lipgloss.NewStyle().Width(80).Render(content)
-				m.viewport.SetContent(wrappedContent)
+				// Align(Center) mis-centers because Width(80) pads every line to exactly
+				// 80 chars with trailing spaces, skewing the centering math. Instead,
+				// calculate the left offset directly to shift the block into true center.
+				leftPad := max(0, (m.viewport.Width()-80)/2)
+				centeredContent := lipgloss.NewStyle().PaddingLeft(leftPad).Render(wrappedContent)
+				m.viewport.SetContent(centeredContent)
 				m.viewport.SetHighlights(regexp.MustCompile(`\bChrist\b|\bJesus\b`).FindAllStringIndex(content, -1))
 				m.ready = true
 
