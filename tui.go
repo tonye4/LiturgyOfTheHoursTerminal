@@ -11,6 +11,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/tonye4/LiturgyOfTheHoursTerminal/prayers"
+	"github.com/tonye4/LiturgyOfTheHoursTerminal/tabs"
 )
 
 // ─── View states ─────────────────────────────────────────────────────────────
@@ -75,6 +76,7 @@ type model struct {
 	ready         bool
 	termWidth     int
 	termHeight    int
+	tab           *tabs.Tabs
 }
 
 // ─── Messages ────────────────────────────────────────────────────────────────
@@ -89,10 +91,12 @@ type errMsg struct{ err error }
 
 // ─── Commands ────────────────────────────────────────────────────────────────
 
-func loadPrayersCmd() tea.Cmd {
+// may be problematic including the model
+func (m model) loadPrayersCmd() tea.Cmd {
 	return func() tea.Msg {
 		// Read in and unmarshall our cached_prayers.json into the prayerList map.
 		// It should be populated but if it's not we need to fetch more prayers.
+
 		fileBytes, err := os.ReadFile("cached_prayers.json")
 		if err != nil {
 			return errMsg{fmt.Errorf("could not read cached_prayers.json: %w", err)}
@@ -106,8 +110,22 @@ func loadPrayersCmd() tea.Cmd {
 		// Check if our list of prayers contains our date.
 		// If our today date doesn't exist, we scrape
 		// for more prayers for today and future dates.
-		// TODO: Create a test for this bit of logic.
-		date := Today()
+
+		currentTab := m.tab.CurrentTab()
+
+		var menuDate tabs.Tab
+
+		switch currentTab {
+		case 0:
+			menuDate = tabs.Today
+
+		case 1:
+			menuDate = tabs.Yesterday
+		case 2:
+			menuDate = tabs.Tomorrow
+		}
+
+		date := GetFormattedDate(menuDate)
 		day, ok := prayersList[date]
 		if !ok {
 			prayers.GetPrayers()
@@ -129,7 +147,7 @@ func loadPrayersCmd() tea.Cmd {
 
 func (m model) Init() tea.Cmd {
 	// TODO: Get the program to have a loading page if the getting prayers takes a while.
-	return loadPrayersCmd()
+	return m.loadPrayersCmd()
 }
 
 // ─── Update ──────────────────────────────────────────────────────────────────
@@ -203,8 +221,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.viewport.SetContent(wrappedContent)
 				m.viewport.SetHighlights(regexp.MustCompile(`\bChrist\b|\bJesus\b`).FindAllStringIndex(content, -1))
 				m.ready = true
+
+			case "tab":
+				// TODO: Check if our prayer exists
+				// TODO: Call our Next() tab function
+				// TODO: Update our menu to reflect that days prayers -> renderMenu()
 			}
-			// TODO: Add an event for hitting tab.
 
 		case prayerState:
 			switch msg.String() {
@@ -260,7 +282,11 @@ func (m model) renderMenu() string {
 
 	var lines []string
 	lines = append(lines, appTitleStyle.Render("Divine Office"))
+	// Highlight our current prayer selected
+
+	lines = append(lines, subtitleStyle.Render("Yesterday"))
 	lines = append(lines, subtitleStyle.Render(formatDate(m.prayerDate)))
+	lines = append(lines, subtitleStyle.Render("Tomorrow"))
 	lines = append(lines, "")
 
 	if len(m.prayerNames) == 0 {
@@ -274,6 +300,8 @@ func (m model) renderMenu() string {
 			}
 		}
 		// TODO: Render our today, tomorrow and yesterday tab (Yesterday, Today, Tomorrow)
+		// TODO: If our tab is on tomorrow (have the date shown and highlighted)
+		// TODO: If our tab is on tomorrow, have the prayers reflected
 		// * Defaults to today
 		// Rendering our cursor position.
 		for i, name := range m.prayerNames {
@@ -287,7 +315,7 @@ func (m model) renderMenu() string {
 		}
 
 		lines = append(lines, "")
-		lines = append(lines, helpStyle.Render("↑/k up   ↓/j down   enter select   q quit"))
+		lines = append(lines, helpStyle.Render("↑/k up   ↓/j down   tab (switch tabs)   enter select  q quit"))
 	}
 
 	// vertical centering
@@ -341,7 +369,7 @@ func formatDate(d string) string {
 // ─── Entry point ─────────────────────────────────────────────────────────────
 
 func main() {
-	p := tea.NewProgram(model{})
+	p := tea.NewProgram(model{tab: tabs.NewTabs()})
 	if _, err := p.Run(); err != nil {
 		fmt.Println("could not run program:", err)
 		os.Exit(1)

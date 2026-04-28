@@ -4,27 +4,23 @@ type Tab int
 
 const (
 	Today Tab = iota
-	Tomorrow
 	Yesterday
+	Tomorrow
 )
 
 type Tabs struct {
-	base         []Tab
-	active       []Tab
+	active       [3]Tab
 	currentIndex int
+}
+
+func NewTabs() *Tabs {
+	return &Tabs{active: [3]Tab{}}
 }
 
 func (t *Tabs) Next() {
 	t.currentIndex++
 	if t.currentIndex >= len(t.active) {
-		t.currentIndex = 0
-	}
-}
-
-func (t *Tabs) Prev() {
-	t.currentIndex--
-	if t.currentIndex < len(t.active) {
-		t.currentIndex = 0
+		t.currentIndex = 1
 	}
 }
 
