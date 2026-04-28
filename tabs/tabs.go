@@ -13,6 +13,7 @@ type Tabs struct {
 	currentIndex int
 }
 
+// Need to init our Tabs or we get a runtime panic
 func NewTabs() *Tabs {
 	return &Tabs{active: [3]Tab{Yesterday, Today, Tomorrow}, currentIndex: 1}
 }

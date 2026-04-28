@@ -289,7 +289,7 @@ func (m model) renderMenu() string {
 	var lines []string
 	lines = append(lines, appTitleStyle.Render("Divine Office"))
 
-	// render out our tab options
+	/* -- render out our tab options -- */
 	// Bolden our current prayer selected
 	lines = append(lines, "")
 	tabLabels := [3]string{"Yesterday", "Today", "Tomorrow"}
@@ -319,10 +319,7 @@ func (m model) renderMenu() string {
 				maxW = w
 			}
 		}
-		// TODO: Render our today, tomorrow and yesterday tab (Yesterday, Today, Tomorrow)
-		// TODO: If our tab is on tomorrow (have the date shown and highlighted)
-		// TODO: If our tab is on tomorrow, have the prayers reflected
-		// * Defaults to today
+		// Defaults to today
 		// Rendering our cursor position.
 		for i, name := range m.prayerNames {
 			var item string
