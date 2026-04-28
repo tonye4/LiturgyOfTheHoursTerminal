@@ -14,3 +14,9 @@
 - [ ] Not all prayers start from 0% within the paginator. Fix this bug.
 - [ ] On keywords such as PSALMODY, Ribbon placement...highlight red and center align
 - [ ] Center align viewport
+- [ ] Potentially implement a character limit to break long continuous blocks of text. 
+When capturing text, instead of making a single large string with the string builder, perhaps make it so each time a line is read, store that information into a relational data structure (eg; dict) so that each line can be accessed individually.
+This is useful because you can treat each line as an object which makes formatting easier; eg: for character counting.
+    - Alternative: When pulling each text node from the tree, have each string's word count counted and if 
+    it's above some arbitrary word count set, then append a `\n` in the middle of the string. 
+    (Let's say 15 words in a sentence would indicate the need for a line break.)

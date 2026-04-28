@@ -70,7 +70,7 @@ func FormatString(str string) string {
 		if n.Type == html.TextNode {
 			// Manually adding line breaks after punctuation to 'wrap'
 			// the long blocks of text that fall offscreen.
-			r := regexp.MustCompile(`[,.;:]`)
+			r := regexp.MustCompile(`[,.;:!]`)
 			// $0 is just the placeholder for the replacement regex string
 			foldedString := r.ReplaceAllString(n.Data, "$0\n")
 			b.WriteString(foldedString)
@@ -92,7 +92,6 @@ func cachePrayers(prayers ApiResponse) {
 		panic(err1)
 	}
 
-	//fmt.Println(string(jsonedPrayers))
 	// Write object into file
 	// Create second file that holds data
 	file, err2 := os.Create("cached_prayers.json")
@@ -147,8 +146,5 @@ func GetPrayers() {
 	// Visit the API endpoint directly
 	c.Visit(url)
 	// the api query is dynamic in that it changes each day, so need it to be updated.
-
-	// Can implement caching, each week sunday, data is pulled into a .json file and then is just used accordingly to each day.
-	// Will reduce the load on the server via batching.
 	//https://divineoffice.org/wp-json/do/v1/prayers/?date_start={{20260129}}
 }

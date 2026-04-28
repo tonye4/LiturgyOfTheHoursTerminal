@@ -196,10 +196,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.viewport.HighlightStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
 				m.viewport.SelectedHighlightStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
 				content := m.prayerList[m.selectedTitle]
-				m.viewport.SetContent(content)
+
+				// Wrapping our content with a width before setting allows for
+				// sensible line breaks in long blocks of text.
+				wrappedContent := lipgloss.NewStyle().Width(150).Render(content)
+				m.viewport.SetContent(wrappedContent)
 				m.viewport.SetHighlights(regexp.MustCompile(`\bChrist\b|\bJesus\b`).FindAllStringIndex(content, -1))
 				m.ready = true
 			}
+			// TODO: Add an event for hitting tab.
 
 		case prayerState:
 			switch msg.String() {
@@ -224,7 +229,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 // ─── View ────────────────────────────────────────────────────────────────────
 
 func (m model) View() tea.View {
-	// where all the actual rendering happens
+	// where all the actual renderling happens
 	var v tea.View
 	v.AltScreen = true
 	v.MouseMode = tea.MouseModeCellMotion
@@ -268,7 +273,8 @@ func (m model) renderMenu() string {
 				maxW = w
 			}
 		}
-
+		// TODO: Render our today, tomorrow and yesterday tab (Yesterday, Today, Tomorrow)
+		// * Defaults to today
 		// Rendering our cursor position.
 		for i, name := range m.prayerNames {
 			var item string
