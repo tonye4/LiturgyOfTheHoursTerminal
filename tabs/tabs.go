@@ -14,13 +14,24 @@ type Tabs struct {
 }
 
 func NewTabs() *Tabs {
-	return &Tabs{active: [3]Tab{}}
+	return &Tabs{active: [3]Tab{Yesterday, Today, Tomorrow}, currentIndex: 1}
+}
+
+func (t *Tabs) CurrentIndex() int {
+	return t.currentIndex
 }
 
 func (t *Tabs) Next() {
 	t.currentIndex++
 	if t.currentIndex >= len(t.active) {
-		t.currentIndex = 1
+		t.currentIndex = 0
+	}
+}
+
+func (t *Tabs) Prev() {
+	t.currentIndex--
+	if t.currentIndex < 0 {
+		t.currentIndex = 2
 	}
 }
 

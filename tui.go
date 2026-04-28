@@ -44,6 +44,9 @@ var (
 				Foreground(lipgloss.Color("#FAFAFA")).
 				Background(lipgloss.Color("#7D56F4"))
 
+	selectedTabStyle = lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#FAFAFA")).Bold(true)
+
 	normalItemStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#DDDDDD"))
 
@@ -222,10 +225,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.viewport.SetHighlights(regexp.MustCompile(`\bChrist\b|\bJesus\b`).FindAllStringIndex(content, -1))
 				m.ready = true
 
-			case "tab":
-				// TODO: Check if our prayer exists
-				// TODO: Call our Next() tab function
-				// TODO: Update our menu to reflect that days prayers -> renderMenu()
+			case "h", "left":
+				m.tab.Prev()
+				return m, m.loadPrayersCmd()
+
+			case "l", "right":
+				m.tab.Next()
+				return m, m.loadPrayersCmd()
 			}
 
 		case prayerState:
@@ -282,11 +288,25 @@ func (m model) renderMenu() string {
 
 	var lines []string
 	lines = append(lines, appTitleStyle.Render("Divine Office"))
-	// Highlight our current prayer selected
 
-	lines = append(lines, subtitleStyle.Render("Yesterday"))
+	// render out our tab options
+	// Bolden our current prayer selected
+	lines = append(lines, "")
+	tabLabels := [3]string{"Yesterday", "Today", "Tomorrow"}
+	activeTab := m.tab.CurrentIndex()
+	var tabParts []string
+	for i, label := range tabLabels {
+		if i == activeTab {
+			tabParts = append(tabParts, selectedTabStyle.Render(" "+label+" "))
+		} else {
+			tabParts = append(tabParts, subtitleStyle.Render(" "+label+" "))
+		}
+	}
+	lines = append(lines, strings.Join(tabParts, subtitleStyle.Render(" | ")))
+
+	lines = append(lines, "")
+
 	lines = append(lines, subtitleStyle.Render(formatDate(m.prayerDate)))
-	lines = append(lines, subtitleStyle.Render("Tomorrow"))
 	lines = append(lines, "")
 
 	if len(m.prayerNames) == 0 {
@@ -315,7 +335,7 @@ func (m model) renderMenu() string {
 		}
 
 		lines = append(lines, "")
-		lines = append(lines, helpStyle.Render("↑/k up   ↓/j down   tab (switch tabs)   enter select  q quit"))
+		lines = append(lines, helpStyle.Render("↑/k up   ↓/j down   <-/h | ->/l (switch tabs)   enter select  q quit"))
 	}
 
 	// vertical centering
