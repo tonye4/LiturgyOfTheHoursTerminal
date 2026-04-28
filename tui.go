@@ -10,9 +10,9 @@ import (
 	"charm.land/bubbles/v2/viewport"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	"github.com/tonye4/LiturgyOfTheHoursTerminal/prayers"
+	"github.com/tonye4/LiturgyOfTheHoursTerminal/tabs"
 )
-
-// TODO: add line folding. Entire paragraphs go off screen if there's no html element seperating each line.
 
 // ─── View states ─────────────────────────────────────────────────────────────
 
@@ -29,7 +29,7 @@ var (
 	appTitleStyle = lipgloss.NewStyle().
 			Bold(true).
 			Foreground(lipgloss.Color("#FAFAFA")).
-			Background(lipgloss.Color("#7D56F4")).
+			Background(lipgloss.Color("#952e2e")).
 			Padding(0, 3)
 
 	subtitleStyle = lipgloss.NewStyle().
@@ -37,12 +37,15 @@ var (
 			Italic(true)
 
 	cursorStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#7D56F4")).
+			Foreground(lipgloss.Color("#952e2e")).
 			Bold(true)
 
 	selectedItemStyle = lipgloss.NewStyle().
 				Foreground(lipgloss.Color("#FAFAFA")).
-				Background(lipgloss.Color("#7D56F4"))
+				Background(lipgloss.Color("#952e2e"))
+
+	selectedTabStyle = lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#FAFAFA")).Bold(true)
 
 	normalItemStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#DDDDDD"))
@@ -76,6 +79,7 @@ type model struct {
 	ready         bool
 	termWidth     int
 	termHeight    int
+	tab           *tabs.Tabs
 }
 
 // ─── Messages ────────────────────────────────────────────────────────────────
@@ -90,40 +94,52 @@ type errMsg struct{ err error }
 
 // ─── Commands ────────────────────────────────────────────────────────────────
 
-func loadPrayersCmd() tea.Cmd {
+// may be problematic including the model
+func (m model) loadPrayersCmd() tea.Cmd {
 	return func() tea.Msg {
+		// Read in and unmarshall our cached_prayers.json into the prayerList map.
+		// It should be populated but if it's not we need to fetch more prayers.
+
 		fileBytes, err := os.ReadFile("cached_prayers.json")
 		if err != nil {
 			return errMsg{fmt.Errorf("could not read cached_prayers.json: %w", err)}
 		}
 
-		var prayers ApiResponse
-		if err := json.Unmarshal(fileBytes, &prayers); err != nil {
+		var prayersList prayers.ApiResponse
+		if err := json.Unmarshal(fileBytes, &prayersList); err != nil {
 			return errMsg{fmt.Errorf("could not parse prayers JSON: %w", err)}
 		}
 
-		date := today()
-		day, ok := prayers[date]
+		// Check if our list of prayers contains our date.
+		// If our today date doesn't exist, we scrape
+		// for more prayers for today and future dates.
+
+		currentTab := m.tab.CurrentTab()
+
+		var menuDate tabs.Tab
+
+		switch currentTab {
+		case 0:
+			menuDate = tabs.Today
+
+		case 1:
+			menuDate = tabs.Yesterday
+		case 2:
+			menuDate = tabs.Tomorrow
+		}
+
+		date := GetFormattedDate(menuDate)
+		day, ok := prayersList[date]
 		if !ok {
-			// fall back to the most recent cached date
-			latest := ""
-			for k := range prayers {
-				if k > latest {
-					latest = k
-				}
-			}
-			if latest == "" {
-				return errMsg{fmt.Errorf("no prayers found in cache")}
-			}
-			date = latest
-			day = prayers[date]
+			prayers.GetPrayers()
+			day = prayersList[date]
 		}
 
 		var names []string
 		list := make(map[string]string)
 		for _, p := range day.Prayers {
 			names = append(names, p.PostTitle)
-			list[p.PostTitle] = formatString(p.PostContent)
+			list[p.PostTitle] = prayers.FormatString(p.PostContent)
 		}
 
 		return prayerLoadedMsg{names, list, date}
@@ -134,8 +150,7 @@ func loadPrayersCmd() tea.Cmd {
 
 func (m model) Init() tea.Cmd {
 	// TODO: Get the program to have a loading page if the getting prayers takes a while.
-	GetPrayers()
-	return loadPrayersCmd()
+	return m.loadPrayersCmd()
 }
 
 // ─── Update ──────────────────────────────────────────────────────────────────
@@ -148,6 +163,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 
+	// After the prayer loaded msg returns we set the returned values to our model struct fields for rendering.
 	case prayerLoadedMsg:
 		m.prayerNames = msg.names
 		m.prayerList = msg.prayerList
@@ -182,6 +198,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.cursor < len(m.prayerNames)-1 {
 					m.cursor++
 				}
+			// When the user presses enter, we set the specific prayer
+			// within the viewport.
 			case "enter", " ":
 				if len(m.prayerNames) == 0 {
 					break
@@ -199,9 +217,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.viewport.HighlightStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
 				m.viewport.SelectedHighlightStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
 				content := m.prayerList[m.selectedTitle]
-				m.viewport.SetContent(content)
+
+				// Wrapping our content with a width before setting allows for
+				// sensible line breaks in long blocks of text.
+				wrappedContent := lipgloss.NewStyle().Width(150).Render(content)
+				m.viewport.SetContent(wrappedContent)
 				m.viewport.SetHighlights(regexp.MustCompile(`\bChrist\b|\bJesus\b`).FindAllStringIndex(content, -1))
 				m.ready = true
+
+			case "h", "left":
+				m.tab.Prev()
+				return m, m.loadPrayersCmd()
+
+			case "l", "right":
+				m.tab.Next()
+				return m, m.loadPrayersCmd()
 			}
 
 		case prayerState:
@@ -227,6 +257,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 // ─── View ────────────────────────────────────────────────────────────────────
 
 func (m model) View() tea.View {
+	// where all the actual renderling happens
 	var v tea.View
 	v.AltScreen = true
 	v.MouseMode = tea.MouseModeCellMotion
@@ -257,6 +288,24 @@ func (m model) renderMenu() string {
 
 	var lines []string
 	lines = append(lines, appTitleStyle.Render("Divine Office"))
+
+	/* -- render out our tab options -- */
+	// Bolden our current prayer selected
+	lines = append(lines, "")
+	tabLabels := [3]string{"Yesterday", "Today", "Tomorrow"}
+	activeTab := m.tab.CurrentIndex()
+	var tabParts []string
+	for i, label := range tabLabels {
+		if i == activeTab {
+			tabParts = append(tabParts, selectedTabStyle.Render(" "+label+" "))
+		} else {
+			tabParts = append(tabParts, subtitleStyle.Render(" "+label+" "))
+		}
+	}
+	lines = append(lines, strings.Join(tabParts, subtitleStyle.Render(" | ")))
+
+	lines = append(lines, "")
+
 	lines = append(lines, subtitleStyle.Render(formatDate(m.prayerDate)))
 	lines = append(lines, "")
 
@@ -270,7 +319,8 @@ func (m model) renderMenu() string {
 				maxW = w
 			}
 		}
-
+		// Defaults to today
+		// Rendering our cursor position.
 		for i, name := range m.prayerNames {
 			var item string
 			if m.cursor == i {
@@ -282,7 +332,7 @@ func (m model) renderMenu() string {
 		}
 
 		lines = append(lines, "")
-		lines = append(lines, helpStyle.Render("↑/k up   ↓/j down   enter select   q quit"))
+		lines = append(lines, helpStyle.Render("↑/k up   ↓/j down   <-/h | ->/l (switch tabs)   enter select  q quit"))
 	}
 
 	// vertical centering
@@ -336,7 +386,7 @@ func formatDate(d string) string {
 // ─── Entry point ─────────────────────────────────────────────────────────────
 
 func main() {
-	p := tea.NewProgram(model{})
+	p := tea.NewProgram(model{tab: tabs.NewTabs()})
 	if _, err := p.Run(); err != nil {
 		fmt.Println("could not run program:", err)
 		os.Exit(1)
