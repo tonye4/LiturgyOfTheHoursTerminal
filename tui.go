@@ -29,7 +29,7 @@ var (
 	appTitleStyle = lipgloss.NewStyle().
 			Bold(true).
 			Foreground(lipgloss.Color("#FAFAFA")).
-			Background(lipgloss.Color("#7D56F4")).
+			Background(lipgloss.Color("#952e2e")).
 			Padding(0, 3)
 
 	subtitleStyle = lipgloss.NewStyle().
@@ -37,12 +37,12 @@ var (
 			Italic(true)
 
 	cursorStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#7D56F4")).
+			Foreground(lipgloss.Color("#952e2e")).
 			Bold(true)
 
 	selectedItemStyle = lipgloss.NewStyle().
 				Foreground(lipgloss.Color("#FAFAFA")).
-				Background(lipgloss.Color("#7D56F4"))
+				Background(lipgloss.Color("#952e2e"))
 
 	selectedTabStyle = lipgloss.NewStyle().
 				Foreground(lipgloss.Color("#FAFAFA")).Bold(true)
