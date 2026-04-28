@@ -94,7 +94,6 @@ type errMsg struct{ err error }
 
 // ─── Commands ────────────────────────────────────────────────────────────────
 
-// may be problematic including the model
 func (m model) loadPrayersCmd() tea.Cmd {
 	return func() tea.Msg {
 		// Read in and unmarshall our cached_prayers.json into the prayerList map.
