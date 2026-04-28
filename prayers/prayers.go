@@ -67,6 +67,18 @@ func FormatString(str string) string {
 	var b strings.Builder
 	var f func(*html.Node)
 	f = func(n *html.Node) {
+		// Skip <style>/<script> elements and the donation CTA the site injects
+		// (identified by the "stc-content-filter" CSS class) along with all their children.
+		if n.Type == html.ElementNode {
+			if n.Data == "style" || n.Data == "script" {
+				return
+			}
+			for _, a := range n.Attr {
+				if a.Key == "class" && strings.Contains(a.Val, "stc-content-filter") {
+					return
+				}
+			}
+		}
 		if n.Type == html.TextNode {
 			// Manually adding line breaks after punctuation to 'wrap'
 			// the long blocks of text that fall offscreen.
