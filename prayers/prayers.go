@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"regexp"
 	"strings"
 	"time"
 
@@ -79,16 +78,17 @@ func FormatString(str string) string {
 				}
 			}
 		}
+		if n.Type == html.ElementNode && n.Data == "br" {
+			b.WriteString("\n")
+		}
 		if n.Type == html.TextNode {
-			// Manually adding line breaks after punctuation to 'wrap'
-			// the long blocks of text that fall offscreen.
-			r := regexp.MustCompile(`[,.;:!]`)
-			// $0 is just the placeholder for the replacement regex string
-			foldedString := r.ReplaceAllString(n.Data, "$0\n")
-			b.WriteString(foldedString)
+			b.WriteString(n.Data)
 		}
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
 			f(c)
+		}
+		if n.Type == html.ElementNode && n.Data == "p" {
+			b.WriteString("\n\n")
 		}
 	}
 

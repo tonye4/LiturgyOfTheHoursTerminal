@@ -219,7 +219,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				// Wrapping our content with a width before setting allows for
 				// sensible line breaks in long blocks of text.
-				wrappedContent := lipgloss.NewStyle().Width(150).Render(content)
+				wrappedContent := lipgloss.NewStyle().Width(80).Render(content)
 				m.viewport.SetContent(wrappedContent)
 				m.viewport.SetHighlights(regexp.MustCompile(`\bChrist\b|\bJesus\b`).FindAllStringIndex(content, -1))
 				m.ready = true
