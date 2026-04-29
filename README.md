@@ -14,6 +14,16 @@ Run the following inside of the `LiturgyOfTheHoursCLI` directory.
 ```sh
 go run .
 ```
+
+If you're running `zsh` or `bash` as your shell you can create an alias using the following: 
+```sh
+echo 'alias loth="(cd ~/<Location-of-dir> && go run .)"' >> ~/.zshrc
+```
+and run using:
+```sh
+loth
+```
+
 ### Navigation
 
 | Key | Action |
@@ -38,4 +48,4 @@ go run .
 ## Known Bugs
 
 - [ ] Prayer cache is written to the current working directory, so running the installed binary outside the project directory will fail with a missing `cached_prayers.json` error. Fix: store the cache in the user's cache directory (`os.UserCacheDir`).
-    - Until this issue is resolved using the `LiturgyOfTheHours` binary installed with `go install github.com/tonye4/liturgyOfTheHoursCLI@latest` will not work.
+    - Until this issue is resolved using the `LiturgyOfTheHours` binary installed with `go install github.com/tonye4/liturgyOfTheHoursCLI@latest` will not work. So running an alias for the time being is the better alternative.
