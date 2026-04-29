@@ -1,17 +1,8 @@
 # TODOS
 - [ ] Make proper usage docs
 - [x] Add tabs for viewing certain prayers
-- [ ] Fix text highlighting within prayers
-- [x] Add text wrapping (lines split on elements)
-    - Note: <s>I believe the solution is going through each element and splitting the line where there's periods.</s>
-    - Note: The splitting was added via regex pattern matches on punctuation to add more line breaks, however
-    there are still strings that are far too long and I can't seem to find a nice way to format these strings.
-    Perhaps a more idiomatic solution would be to convert our blocks of text into markdown and redner them out that way.
-    The ![Circumflex repo](https://github.com/bensadeh/circumflex) does a good job at parsing text from hackernews.
-    Perhaps the way forward is implementing a parser similar to circumflex.
-- [ ] Remove inline css from prayers
-- [ ] Add command entry point to run the source
+- [x] Fix text highlighting within prayers
+- [x] Remove inline css from prayers
 - [x] Document inline 
-- [ ] Not all prayers start from 0% within the paginator. Fix this bug.
-- [ ] On keywords such as PSALMODY, Ribbon placement...highlight red and center align
-- [ ] Center align viewport
+- [x] Not all prayers start from 0% within the paginator. Fix this bug.
+- [x] Center align viewport
