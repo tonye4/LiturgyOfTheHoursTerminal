@@ -227,6 +227,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				centeredContent := lipgloss.NewStyle().PaddingLeft(leftPad).Render(wrappedContent)
 				m.viewport.SetContent(centeredContent)
 				m.viewport.SetHighlights(regexp.MustCompile(`\bChrist\b|\bJesus\b`).FindAllStringIndex(centeredContent, -1))
+				m.viewport.GotoTop()
 				m.ready = true
 
 			case "h", "left":
