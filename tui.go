@@ -10,8 +10,8 @@ import (
 	"charm.land/bubbles/v2/viewport"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
-	"github.com/tonye4/LiturgyOfTheHoursTerminal/prayers"
-	"github.com/tonye4/LiturgyOfTheHoursTerminal/tabs"
+	"github.com/tonye4/liturgyOfTheHoursCLI/prayers"
+	"github.com/tonye4/liturgyOfTheHoursCLI/tabs"
 )
 
 // ─── View states ─────────────────────────────────────────────────────────────

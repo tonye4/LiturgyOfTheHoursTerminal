@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tonye4/LiturgyOfTheHoursTerminal/tabs"
+	"github.com/tonye4/liturgyOfTheHoursCLI/tabs"
 )
 
 // Date format within the JSON file: 20260206
