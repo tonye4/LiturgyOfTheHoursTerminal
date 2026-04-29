@@ -3,7 +3,7 @@
 A terminal UI for reading the [Liturgy of the Hours](https://divineoffice.org/). Browse and read today's, yesterday's, and tomorrow's Divine Office prayers without leaving your terminal.
 
 <!-- screenshot: full app overview -->
-![App Overview](docs/screenshots/overview.gif)
+![App Overview](./liturgyofthehourscli_demo.gif)
 
 ---
 
