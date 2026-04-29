@@ -1,4 +1,4 @@
-module github.com/tonye4/LiturgyOfTheHoursTerminal
+module github.com/tonye4/liturgyOfTheHoursCLI
 
 go 1.25.5
 
