@@ -9,27 +9,10 @@ A terminal UI for reading the [Liturgy of the Hours](https://divineoffice.org/).
 
 ## Installation/Usage
 
-### With Go
-
-```sh
-go install github.com/tonye4/liturgyOfTheHoursCLI@latest
-```
-The binary will be available as `liturgyOfTheHoursCLI` anywhere in your terminal.
-
-```sh
-liturgyOfTheHoursCLI
-```
 ### From Source
 Run the following inside of the `LiturgyOfTheHoursCLI` directory.
 ```sh
 go run .
-```
-
-### Updating
-To update to the latest version, re-run the same command:
-
-```sh
-go install github.com/tonye4/liturgyOfTheHoursCLI@latest
 ```
 ### Navigation
 
@@ -49,3 +32,10 @@ go install github.com/tonye4/liturgyOfTheHoursCLI@latest
 
 - A terminal with true color support
 - Go 1.25+ (only needed if installing via `go install`)
+
+---
+
+## Known Bugs
+
+- [ ] Prayer cache is written to the current working directory, so running the installed binary outside the project directory will fail with a missing `cached_prayers.json` error. Fix: store the cache in the user's cache directory (`os.UserCacheDir`).
+    - Until this issue is resolved using the `LiturgyOfTheHours` binary installed with `go install github.com/tonye4/liturgyOfTheHoursCLI@latest` will not work.
