@@ -213,8 +213,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					viewport.WithHeight(m.termHeight-headerH-footerH),
 				)
 				m.viewport.YPosition = headerH
-				m.viewport.HighlightStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
-				m.viewport.SelectedHighlightStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
+				m.viewport.HighlightStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000")).Bold(true)
+				m.viewport.SelectedHighlightStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000")).Bold(true)
 				content := m.prayerList[m.selectedTitle]
 
 				// Wrapping our content with a width before setting allows for
@@ -226,7 +226,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				leftPad := max(0, (m.viewport.Width()-80)/2)
 				centeredContent := lipgloss.NewStyle().PaddingLeft(leftPad).Render(wrappedContent)
 				m.viewport.SetContent(centeredContent)
-				m.viewport.SetHighlights(regexp.MustCompile(`\bChrist\b|\bJesus\b`).FindAllStringIndex(content, -1))
+				m.viewport.SetHighlights(regexp.MustCompile(`\bChrist\b|\bJesus\b`).FindAllStringIndex(centeredContent, -1))
 				m.ready = true
 
 			case "h", "left":
@@ -291,7 +291,7 @@ func (m model) renderMenu() string {
 	center := lipgloss.NewStyle().Width(m.termWidth).Align(lipgloss.Center)
 
 	var lines []string
-	lines = append(lines, appTitleStyle.Render("Divine Office"))
+	lines = append(lines, appTitleStyle.Render(" ☩ Divine Office ☩"))
 
 	/* -- render out our tab options -- */
 	// Bolden our current prayer selected
